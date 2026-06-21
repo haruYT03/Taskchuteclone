@@ -30,160 +30,112 @@
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
              env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .wrap {
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 16px 16px 96px;
-  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 92px; }
 
   header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 14px;
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 8px; margin-bottom: 14px;
   }
-  header h1 {
-    font-size: 17px;
-    font-weight: 600;
-    margin: 0;
-    letter-spacing: 0.02em;
-  }
-  .now-clock {
-    font-variant-numeric: tabular-nums;
-    color: var(--muted);
-    font-size: 13px;
-  }
+  header h1 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+  .now-clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
 
-  .summary {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+  .summary { display: flex; gap: 10px; margin-bottom: 12px; }
   .summary .card {
-    flex: 1;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 10px 12px;
+    flex: 1; background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 9px 12px;
   }
   .summary .label { font-size: 11px; color: var(--muted); }
   .summary .value {
-    font-size: 20px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    margin-top: 2px;
+    font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px;
   }
+
+  .toolbar { display: flex; justify-content: flex-end; gap: 6px; margin: 2px 0 12px; }
+  .toolbar button { background: transparent; color: var(--muted); padding: 4px 8px; font-size: 12px; }
 
   ul.timeline { list-style: none; margin: 0; padding: 0; }
   li.task {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 12px;
-    margin-bottom: 10px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 8px 12px;
-    align-items: center;
-    transition: border-color .15s, opacity .15s;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 10px 12px; margin-bottom: 9px;
+    display: grid; grid-template-columns: 18px 1fr auto; gap: 0 10px; align-items: center;
+    transition: border-color .15s, opacity .15s, box-shadow .15s;
   }
   li.task.running { border-color: var(--accent); background: var(--accent-soft); }
-  li.task.done { opacity: .55; }
+  li.task.done { opacity: .5; }
+  li.task.dragging { opacity: .9; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
 
-  .task-main { min-width: 0; }
-  .task-name {
-    font-size: 15px;
-    font-weight: 500;
-    word-break: break-word;
+  .handle {
+    grid-column: 1; color: var(--muted); font-size: 15px; line-height: 1;
+    cursor: grab; user-select: none; touch-action: none; text-align: center;
+    align-self: center; height: 100%; display: flex; align-items: center; justify-content: center;
   }
+  .handle:active { cursor: grabbing; }
+  .handle:focus-visible { outline: 2px solid var(--accent); border-radius: 6px; }
+  .handle.empty { cursor: default; }
+
+  .task-main { grid-column: 2; min-width: 0; }
+  .task-name {
+    font-size: 15px; font-weight: 500; word-break: break-word;
+    cursor: text; border-bottom: 1px dashed transparent;
+  }
+  .task-name:hover { border-bottom-color: var(--line); }
   li.task.done .task-name { text-decoration: line-through; }
   .task-meta {
-    margin-top: 3px;
-    font-size: 12px;
-    color: var(--muted);
+    margin-top: 2px; font-size: 12px; color: var(--muted);
     font-variant-numeric: tabular-nums;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
-    align-items: center;
+    display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center;
   }
-  .task-meta .dur { color: var(--text); }
-  .task-meta .sched .arr { opacity: .5; margin: 0 2px; }
-  .countdown {
-    color: var(--accent);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
+  .task-meta .dur { color: var(--text); cursor: text; border-bottom: 1px dashed transparent; }
+  .task-meta .dur:hover { border-bottom-color: var(--line); }
+  .task-meta .dur.unset { color: var(--accent); }
+  .task-meta .sched .arr { opacity: .45; margin: 0 1px; }
+  .countdown { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
   .countdown.over { color: var(--warn); }
 
-  .task-actions { display: flex; gap: 6px; align-items: center; }
+  .task-actions { grid-column: 3; display: flex; gap: 4px; align-items: center; }
+
+  .inline-edit {
+    background: var(--panel-2); border: 1px solid var(--accent); border-radius: 6px;
+    color: var(--text); font: inherit; padding: 2px 6px; max-width: 100%;
+  }
+  .inline-edit.num { width: 64px; text-align: center; -moz-appearance: textfield; }
+  .inline-edit.num::-webkit-outer-spin-button,
+  .inline-edit.num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
   button {
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    padding: 8px 14px;
-    color: var(--text);
-    background: var(--panel-2);
+    font-family: inherit; cursor: pointer; border: none; border-radius: 10px;
+    font-size: 14px; padding: 8px 12px; color: var(--text); background: var(--panel-2);
     transition: filter .12s, background .12s;
   }
   button:active { filter: brightness(1.25); }
   button.primary { background: var(--accent); color: #06101f; font-weight: 600; }
   button.done-btn { background: var(--done); color: #052016; font-weight: 600; }
-  button.ghost { background: transparent; color: var(--muted); padding: 6px 8px; }
-  button.icon { background: transparent; color: var(--muted); padding: 4px 6px; font-size: 16px; line-height: 1; }
-  button.icon:hover { color: var(--text); }
-
-  .empty {
-    text-align: center;
-    color: var(--muted);
-    padding: 40px 12px;
-    font-size: 14px;
+  button.icon {
+    background: transparent; color: var(--muted); padding: 5px 7px;
+    font-size: 16px; line-height: 1;
   }
+  button.icon:hover { color: var(--text); }
+  button.icon.go { background: var(--accent); color: #06101f; }
+  button.icon.ok { background: var(--done); color: #052016; }
 
-  /* Add bar */
+  .empty { text-align: center; color: var(--muted); padding: 36px 12px; font-size: 14px; }
+
   .addbar {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, var(--bg) 72%, transparent);
     padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
   }
   .addbar-inner {
-    max-width: 560px; margin: 0 auto;
-    display: flex; gap: 8px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 8px;
+    max-width: 560px; margin: 0 auto; display: flex; gap: 8px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 8px;
   }
-  .addbar input[type="text"] {
-    flex: 1; min-width: 0;
-    background: transparent; border: none; outline: none;
-    color: var(--text); font-size: 16px; padding: 4px 6px;
+  .addbar input {
+    flex: 1; min-width: 0; background: transparent; border: none; outline: none;
+    color: var(--text); font-size: 16px; padding: 4px 8px;
   }
-  .addbar input[type="number"] {
-    width: 56px;
-    background: var(--panel-2); border: 1px solid var(--line);
-    border-radius: 8px; color: var(--text);
-    font-size: 15px; text-align: center; padding: 6px 4px;
-    -moz-appearance: textfield;
-  }
-  .addbar input[type="number"]::-webkit-outer-spin-button,
-  .addbar input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .addbar .unit { color: var(--muted); font-size: 12px; align-self: center; }
-
-  .quick {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    max-width: 560px; margin: 0 auto 8px; justify-content: flex-end;
-  }
-  .quick button { padding: 5px 10px; font-size: 12px; background: var(--panel-2); color: var(--muted); }
-
-  .toolbar {
-    display: flex; justify-content: flex-end; gap: 8px;
-    margin: 4px 0 14px;
+  .add-btn {
+    width: 44px; padding: 0; font-size: 22px; font-weight: 400; line-height: 1;
+    display: flex; align-items: center; justify-content: center; flex: none;
   }
 </style>
 </head>
@@ -196,36 +148,32 @@
 
   <div class="summary">
     <div class="card">
-      <div class="label">残り合計</div>
+      <div class="label">残り</div>
       <div class="value" id="sumRemaining">0分</div>
     </div>
     <div class="card">
-      <div class="label">この調子だと終了</div>
+      <div class="label">終了予定</div>
       <div class="value" id="sumFinish">--:--</div>
     </div>
   </div>
 
   <div class="toolbar">
-    <button class="ghost" id="clearDone">完了を消す</button>
-    <button class="ghost" id="resetAll">全部リセット</button>
+    <button id="clearDone" title="完了したものを消す">完了を消す</button>
+    <button id="resetAll" title="すべて消す">全消去</button>
   </div>
 
   <ul class="timeline" id="timeline"></ul>
-  <div class="empty" id="empty">下の入力欄から「やること」と所要時間を足してください。<br>上から実行ボタンで順番に進みます。</div>
+  <div class="empty" id="empty">
+    下の欄に「やること 時間」を入れて＋。<br>
+    改行で複数行を貼り付ければまとめて取り込めます。<br>
+    例: 買い物 30 / ゲーム 1h / 昼寝 20m / 歯みがき 5
+  </div>
 </div>
 
 <div class="addbar">
-  <div class="quick" id="quick">
-    <button data-min="5">5分</button>
-    <button data-min="10">10分</button>
-    <button data-min="20">20分</button>
-    <button data-min="40">40分</button>
-  </div>
   <form class="addbar-inner" id="addForm">
-    <input type="text" id="nameInput" placeholder="やること" autocomplete="off" />
-    <input type="number" id="minInput" placeholder="分" min="1" max="600" inputmode="numeric" />
-    <span class="unit">分</span>
-    <button type="submit" class="primary">追加</button>
+    <input type="text" id="nameInput" placeholder="やること 30  （改行で複数貼り付けOK）" autocomplete="off" />
+    <button type="submit" class="primary add-btn" title="追加">＋</button>
   </form>
 </div>
 
@@ -235,104 +183,107 @@
 
   var STORAGE_KEY = "imayaru.tasks.v1";
 
-  /** @type {Array<{id:string,name:string,dur:number,status:string,startAt:number|null,endAt:number|null}>} */
+  /** @type {Array<{id:string,name:string,dur:number|null,status:string,startAt:number|null,endAt:number|null}>} */
   var tasks = load();
-  var lastQuickMin = 10;
+  var dragEl = null;
+  var focusHandleId = null;
 
   // ---- persistence ----
   function load() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      var data = JSON.parse(raw);
+      var data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       return Array.isArray(data) ? data : [];
     } catch (e) { return []; }
   }
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch (e) {}
   }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function find(id) { return tasks.find(function (t) { return t.id === id; }); }
 
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  // ---- parsing (bulk / inline) ----
+  // "1h30m", "1h", "90m", "30", "1.5h", "20分", "1時間30分" -> minutes (or null)
+  function parseDuration(token) {
+    if (!token) return null;
+    var t = String(token).trim().toLowerCase().replace(/\s+/g, "");
+    var m;
+    m = t.match(/^(\d+(?:\.\d+)?)(?:h|時間)(?:(\d+)(?:m|分)?)?$/);
+    if (m) return Math.round(parseFloat(m[1]) * 60 + (m[2] ? parseInt(m[2], 10) : 0));
+    m = t.match(/^(\d+)(?:m|分)$/);
+    if (m) return parseInt(m[1], 10);
+    m = t.match(/^(\d+(?:\.\d+)?)$/);
+    if (m) return Math.round(parseFloat(m[1]));
+    return null;
+  }
+  // One line -> {name, dur|null}. Trailing token is read as duration when possible.
+  function parseLine(line) {
+    var s = String(line).replace(/　/g, " ").trim();
+    if (!s) return null;
+    var parts = s.split(/\s+/);
+    if (parts.length >= 2) {
+      var dur = parseDuration(parts[parts.length - 1]);
+      if (dur != null) return { name: parts.slice(0, -1).join(" "), dur: dur };
+    }
+    return { name: s, dur: null }; // 時間が読めない -> 名前だけ取り込み（分は後で手動）
+  }
+  function addFromText(text) {
+    var added = 0;
+    String(text).split(/\r?\n/).forEach(function (line) {
+      var p = parseLine(line);
+      if (!p) return;
+      tasks.push({ id: uid(), name: p.name, dur: p.dur, status: "pending", startAt: null, endAt: null });
+      added++;
+    });
+    if (added) { save(); render(); }
+    return added;
   }
 
   // ---- time helpers ----
-  function fmtClock(ms) {
-    var d = new Date(ms);
-    var h = d.getHours();
-    var m = d.getMinutes();
-    return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m);
-  }
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function fmtClock(ms) { var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function fmtMin(min) {
+    if (min == null) return "—";
     if (min < 60) return min + "分";
     var h = Math.floor(min / 60), m = min % 60;
     return m === 0 ? h + "時間" : h + "時間" + m + "分";
   }
   function fmtCountdown(ms) {
-    var over = ms < 0;
-    var s = Math.round(Math.abs(ms) / 1000);
-    var m = Math.floor(s / 60);
-    var sec = s % 60;
-    var str = m + ":" + (sec < 10 ? "0" + sec : sec);
-    return (over ? "+" : "") + str;
+    var over = ms < 0, s = Math.round(Math.abs(ms) / 1000);
+    return (over ? "+" : "") + Math.floor(s / 60) + ":" + pad(s % 60);
   }
 
   // ---- scheduling ----
-  // Returns map id -> {start, end, projected} using a forward cursor from now.
+  function durMs(t) { return (t.dur || 0) * 60000; }
   function computeSchedule() {
-    var now = Date.now();
-    var cursor = now;
-    var sched = {};
-    for (var i = 0; i < tasks.length; i++) {
-      var t = tasks[i];
-      var durMs = t.dur * 60000;
-      if (t.status === "done") {
-        sched[t.id] = { start: t.startAt, end: t.endAt, projected: false };
-        continue;
-      }
+    var now = Date.now(), cursor = now, sched = {};
+    tasks.forEach(function (t) {
+      if (t.status === "done") { sched[t.id] = { start: t.startAt, end: t.endAt }; return; }
       if (t.status === "running") {
-        var end = t.startAt + durMs;
-        sched[t.id] = { start: t.startAt, end: end, projected: true };
+        var end = t.startAt + durMs(t);
+        sched[t.id] = { start: t.startAt, end: end };
         cursor = Math.max(now, end);
-        continue;
+        return;
       }
-      // pending
-      var s = cursor;
-      var e = cursor + durMs;
-      sched[t.id] = { start: s, end: e, projected: true };
-      cursor = e;
-    }
+      sched[t.id] = { start: cursor, end: cursor + durMs(t) };
+      cursor += durMs(t);
+    });
     return { sched: sched, finish: cursor };
   }
-
   function remainingMinutes() {
     var total = 0, now = Date.now();
-    for (var i = 0; i < tasks.length; i++) {
-      var t = tasks[i];
-      if (t.status === "done") continue;
-      if (t.status === "running") {
-        var left = (t.startAt + t.dur * 60000) - now;
-        total += Math.max(0, left) / 60000;
-      } else {
-        total += t.dur;
-      }
-    }
+    tasks.forEach(function (t) {
+      if (t.status === "done") return;
+      if (t.status === "running") total += Math.max(0, (t.startAt + durMs(t)) - now) / 60000;
+      else total += (t.dur || 0);
+    });
     return Math.round(total);
   }
 
   // ---- actions ----
-  function addTask(name, dur) {
-    tasks.push({ id: uid(), name: name, dur: dur, status: "pending", startAt: null, endAt: null });
-    save(); render();
-  }
   function startTask(id) {
-    // only one running at a time; if another runs, finish it first
-    for (var i = 0; i < tasks.length; i++) {
-      if (tasks[i].status === "running" && tasks[i].id !== id) {
-        tasks[i].status = "done";
-        tasks[i].endAt = Date.now();
-      }
-    }
+    tasks.forEach(function (t) {
+      if (t.status === "running" && t.id !== id) { t.status = "done"; t.endAt = Date.now(); }
+    });
     var t = find(id);
     if (t) { t.status = "running"; t.startAt = Date.now(); t.endAt = null; }
     save(); render();
@@ -347,77 +298,145 @@
     if (t) { t.status = "pending"; t.startAt = null; t.endAt = null; }
     save(); render();
   }
-  function deleteTask(id) {
-    tasks = tasks.filter(function (t) { return t.id !== id; });
-    save(); render();
-  }
+  function deleteTask(id) { tasks = tasks.filter(function (t) { return t.id !== id; }); save(); render(); }
   function move(id, dir) {
-    var i = tasks.findIndex(function (t) { return t.id === id; });
-    var j = i + dir;
+    var i = tasks.findIndex(function (t) { return t.id === id; }), j = i + dir;
     if (i < 0 || j < 0 || j >= tasks.length) return;
     var tmp = tasks[i]; tasks[i] = tasks[j]; tasks[j] = tmp;
     save(); render();
   }
-  function find(id) { return tasks.find(function (t) { return t.id === id; }); }
-
   function firstActionableId() {
-    for (var i = 0; i < tasks.length; i++) {
-      if (tasks[i].status !== "done") return tasks[i].id;
-    }
+    for (var i = 0; i < tasks.length; i++) if (tasks[i].status !== "done") return tasks[i].id;
     return null;
   }
-  function anyRunning() {
-    return tasks.some(function (t) { return t.status === "running"; });
+  function anyRunning() { return tasks.some(function (t) { return t.status === "running"; }); }
+
+  // ---- inline editing ----
+  function editInline(span, current, numeric, commit) {
+    var input = document.createElement("input");
+    input.type = numeric ? "number" : "text";
+    input.className = "inline-edit" + (numeric ? " num" : "");
+    if (numeric) { input.min = 0; input.inputMode = "numeric"; }
+    input.value = current;
+    span.parentNode.replaceChild(input, span);
+    input.focus(); input.select();
+    var done = false;
+    function fin(cancel) {
+      if (done) return; done = true;
+      if (!cancel) commit(input.value);
+      save(); render();
+    }
+    input.addEventListener("blur", function () { fin(false); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); fin(false); }
+      else if (e.key === "Escape") { fin(true); }
+    });
+  }
+
+  // ---- drag & drop (mouse + touch via pointer events) ----
+  function startDrag(e, handleEl, li) {
+    if (e.button != null && e.button > 0) return;
+    e.preventDefault();
+    dragEl = li;
+    li.classList.add("dragging");
+    try { handleEl.setPointerCapture(e.pointerId); } catch (_) {}
+
+    function onMove(ev) {
+      var y = ev.clientY, items = [].slice.call(timelineEl.querySelectorAll("li.task")), ref = null;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i] === dragEl) continue;
+        var r = items[i].getBoundingClientRect();
+        if (y < r.top + r.height / 2) { ref = items[i]; break; }
+      }
+      if (ref) timelineEl.insertBefore(dragEl, ref); else timelineEl.appendChild(dragEl);
+    }
+    function onUp() {
+      handleEl.removeEventListener("pointermove", onMove);
+      handleEl.removeEventListener("pointerup", onUp);
+      handleEl.removeEventListener("pointercancel", onUp);
+      li.classList.remove("dragging");
+      var ids = [].slice.call(timelineEl.querySelectorAll("li.task"))
+        .map(function (x) { return x.getAttribute("data-id"); });
+      tasks.sort(function (a, b) { return ids.indexOf(a.id) - ids.indexOf(b.id); });
+      dragEl = null; save(); render();
+    }
+    handleEl.addEventListener("pointermove", onMove);
+    handleEl.addEventListener("pointerup", onUp);
+    handleEl.addEventListener("pointercancel", onUp);
   }
 
   // ---- rendering ----
   var timelineEl = document.getElementById("timeline");
   var emptyEl = document.getElementById("empty");
 
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function iconBtn(label, cls, title, fn) {
+    var b = el("button", "icon " + (cls || ""), label);
+    if (title) b.title = title;
+    b.addEventListener("click", fn);
+    return b;
+  }
+
   function render() {
-    var result = computeSchedule();
-    var sched = result.sched;
+    var result = computeSchedule(), sched = result.sched;
+    var nextId = firstActionableId(), running = anyRunning();
 
     emptyEl.style.display = tasks.length ? "none" : "block";
     timelineEl.innerHTML = "";
 
-    var nextId = firstActionableId();
-    var running = anyRunning();
-
     tasks.forEach(function (t) {
       var s = sched[t.id];
-      var li = document.createElement("li");
-      li.className = "task" + (t.status === "running" ? " running" : "") +
-                     (t.status === "done" ? " done" : "");
+      var li = el("li", "task" + (t.status === "running" ? " running" : "") + (t.status === "done" ? " done" : ""));
+      li.setAttribute("data-id", t.id);
+
+      // drag handle (pending only)
+      var handle = el("div", "handle", t.status === "pending" ? "⋮⋮" : "");
+      if (t.status === "pending") {
+        handle.tabIndex = 0;
+        handle.setAttribute("role", "button");
+        handle.setAttribute("aria-label", "ドラッグ、または Ctrl+↑↓ で並び替え");
+        handle.addEventListener("pointerdown", function (e) { startDrag(e, handle, li); });
+        handle.addEventListener("keydown", function (e) {
+          if (e.ctrlKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault(); focusHandleId = t.id; move(t.id, e.key === "ArrowUp" ? -1 : 1);
+          }
+        });
+      } else { handle.classList.add("empty"); }
+      li.appendChild(handle);
 
       // main
-      var main = document.createElement("div");
-      main.className = "task-main";
-      var nm = document.createElement("div");
-      nm.className = "task-name";
-      nm.textContent = t.name;
+      var main = el("div", "task-main");
+      var nm = el("div", "task-name", t.name);
+      nm.title = "タップで名前を編集";
+      nm.addEventListener("click", function () {
+        editInline(nm, t.name, false, function (v) { v = v.trim(); if (v) t.name = v; });
+      });
       main.appendChild(nm);
 
-      var meta = document.createElement("div");
-      meta.className = "task-meta";
-
-      var dur = document.createElement("span");
-      dur.className = "dur";
-      dur.textContent = fmtMin(t.dur);
+      var meta = el("div", "task-meta");
+      var dur = el("span", "dur" + (t.dur == null ? " unset" : ""), t.dur == null ? "分を設定" : fmtMin(t.dur));
+      dur.title = "タップで時間を編集";
+      dur.addEventListener("click", function () {
+        editInline(dur, t.dur == null ? "" : t.dur, true, function (v) {
+          v = String(v).trim();
+          if (v === "") { t.dur = null; }
+          else { var n = parseInt(v, 10); t.dur = (isNaN(n) || n < 0) ? null : n; }
+        });
+      });
       meta.appendChild(dur);
 
-      if (s && s.start != null && s.end != null) {
-        var sc = document.createElement("span");
-        sc.className = "sched";
-        var tilde = "<span class='arr'>→</span>";
-        sc.innerHTML = fmtClock(s.start) + tilde + fmtClock(s.end) +
-                       (s.projected && t.status !== "running" ? " 予定" : "");
+      if (s && s.start != null && s.end != null && (t.status !== "pending" || t.dur != null)) {
+        var sc = el("span", "sched");
+        sc.innerHTML = fmtClock(s.start) + "<span class='arr'>→</span>" + fmtClock(s.end);
         meta.appendChild(sc);
       }
-
       if (t.status === "running") {
-        var cd = document.createElement("span");
-        cd.className = "countdown";
+        var cd = el("span", "countdown");
         cd.setAttribute("data-cd", t.id);
         meta.appendChild(cd);
       }
@@ -425,107 +444,73 @@
       li.appendChild(main);
 
       // actions
-      var act = document.createElement("div");
-      act.className = "task-actions";
-
+      var act = el("div", "task-actions");
       if (t.status === "running") {
-        act.appendChild(btn("完了", "done-btn", function () { finishTask(t.id); }));
+        act.appendChild(iconBtn("✓", "ok", "完了", function () { finishTask(t.id); }));
       } else if (t.status === "done") {
-        act.appendChild(iconBtn("↺", function () { reopenTask(t.id); }, "やり直す"));
-        act.appendChild(iconBtn("✕", function () { deleteTask(t.id); }, "削除"));
+        act.appendChild(iconBtn("↺", "", "やり直す", function () { reopenTask(t.id); }));
+        act.appendChild(iconBtn("✕", "", "削除", function () { deleteTask(t.id); }));
       } else {
-        // pending
         if (t.id === nextId && !running) {
-          act.appendChild(btn("実行", "primary", function () { startTask(t.id); }));
-        } else {
-          act.appendChild(iconBtn("▲", function () { move(t.id, -1); }, "上へ"));
-          act.appendChild(iconBtn("▼", function () { move(t.id, 1); }, "下へ"));
-          act.appendChild(iconBtn("✕", function () { deleteTask(t.id); }, "削除"));
+          act.appendChild(iconBtn("▶", "go", "実行", function () { startTask(t.id); }));
         }
+        act.appendChild(iconBtn("✕", "", "削除", function () { deleteTask(t.id); }));
       }
       li.appendChild(act);
       timelineEl.appendChild(li);
     });
 
     document.getElementById("sumRemaining").textContent = fmtMin(remainingMinutes());
-    var hasPendingOrRunning = tasks.some(function (t) { return t.status !== "done"; });
-    document.getElementById("sumFinish").textContent =
-      hasPendingOrRunning ? fmtClock(result.finish) : "--:--";
+    var active = tasks.some(function (t) { return t.status !== "done"; });
+    document.getElementById("sumFinish").textContent = active ? fmtClock(result.finish) : "--:--";
 
-    tickCountdowns();
-  }
-
-  function btn(label, cls, fn) {
-    var b = document.createElement("button");
-    b.className = cls;
-    b.textContent = label;
-    b.addEventListener("click", fn);
-    return b;
-  }
-  function iconBtn(label, fn, title) {
-    var b = document.createElement("button");
-    b.className = "icon";
-    b.textContent = label;
-    if (title) b.title = title;
-    b.addEventListener("click", fn);
-    return b;
+    if (focusHandleId) {
+      var h = timelineEl.querySelector('li[data-id="' + focusHandleId + '"] .handle');
+      if (h) h.focus();
+      focusHandleId = null;
+    }
+    tick();
   }
 
   // ---- live ticking ----
-  function tickCountdowns() {
+  function tick() {
     var now = Date.now();
-    var nodes = document.querySelectorAll("[data-cd]");
-    nodes.forEach(function (node) {
-      var id = node.getAttribute("data-cd");
-      var t = find(id);
+    timelineEl.querySelectorAll("[data-cd]").forEach(function (node) {
+      var t = find(node.getAttribute("data-cd"));
       if (!t || t.status !== "running") return;
-      var remain = (t.startAt + t.dur * 60000) - now;
+      var remain = (t.startAt + durMs(t)) - now;
       node.textContent = fmtCountdown(remain);
       node.classList.toggle("over", remain < 0);
     });
     document.getElementById("nowClock").textContent = fmtClock(now);
   }
-
   setInterval(function () {
-    tickCountdowns();
-    // keep projected finish/remaining fresh while a task runs
+    tick();
     if (anyRunning()) {
-      var result = computeSchedule();
+      var r = computeSchedule();
       document.getElementById("sumRemaining").textContent = fmtMin(remainingMinutes());
-      document.getElementById("sumFinish").textContent = fmtClock(result.finish);
+      document.getElementById("sumFinish").textContent = fmtClock(r.finish);
     }
   }, 1000);
 
   // ---- input wiring ----
   var nameInput = document.getElementById("nameInput");
-  var minInput = document.getElementById("minInput");
 
   document.getElementById("addForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    var name = nameInput.value.trim();
-    var min = parseInt(minInput.value, 10);
-    if (!name) { nameInput.focus(); return; }
-    if (!min || min < 1) min = lastQuickMin;
-    addTask(name, min);
-    nameInput.value = "";
-    minInput.value = "";
-    nameInput.focus();
+    if (addFromText(nameInput.value) > 0) { nameInput.value = ""; nameInput.focus(); }
+    else nameInput.focus();
   });
-
-  document.getElementById("quick").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-min]");
-    if (!b) return;
-    lastQuickMin = parseInt(b.getAttribute("data-min"), 10);
-    minInput.value = lastQuickMin;
-    nameInput.focus();
+  nameInput.addEventListener("paste", function (e) {
+    var text = (e.clipboardData || window.clipboardData).getData("text");
+    if (text && /[\r\n]/.test(text)) { e.preventDefault(); addFromText(text); nameInput.value = ""; }
   });
 
   document.getElementById("clearDone").addEventListener("click", function () {
-    tasks = tasks.filter(function (t) { return t.status !== "done"; });
-    save(); render();
+    tasks = tasks.filter(function (t) { return t.status !== "done"; }); save(); render();
   });
   document.getElementById("resetAll").addEventListener("click", function () {
-    if (tasks.length && !confirm("全部消します。よろしいですか？")) return;
+    if (tasks.length && !confirm("すべて消します。よろしいですか？")) return;
     tasks = []; save(); render();
   });
 
