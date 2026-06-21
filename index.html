@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#0f1115" />
+<meta name="theme-color" content="#1d2128" />
 <title>いまやることタイマー</title>
 <style>
   :root {
-    --bg: #0f1115;
-    --panel: #181b22;
-    --panel-2: #1f242e;
-    --line: #2a303c;
+    --bg: #1d2128;
     --text: #e7eaf0;
     --muted: #8b93a3;
+    --faded: rgba(231, 234, 240, 0.42);
     --accent: #4f9dff;
-    --accent-soft: rgba(79, 157, 255, 0.15);
-    --done: #4caf7d;
+    --done: #54c08a;
     --warn: #ff6b6b;
-    --radius: 14px;
+    --radius: 16px;
+    /* neumorphism shadows */
+    --sh-dark: rgba(0, 0, 0, 0.55);
+    --sh-light: rgba(255, 255, 255, 0.045);
+    --raise: 5px 5px 12px var(--sh-dark), -5px -5px 12px var(--sh-light);
+    --raise-sm: 3px 3px 7px var(--sh-dark), -3px -3px 7px var(--sh-light);
+    --inset: inset 4px 4px 9px var(--sh-dark), inset -4px -4px 9px var(--sh-light);
+    --inset-sm: inset 2px 2px 5px var(--sh-dark), inset -2px -2px 5px var(--sh-light);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -30,113 +34,110 @@
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
              env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 92px; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 18px 18px 96px; }
 
   header {
     display: flex; align-items: baseline; justify-content: space-between;
-    gap: 8px; margin-bottom: 14px;
+    gap: 8px; margin-bottom: 16px;
   }
   header h1 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
   .now-clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
 
-  .summary { display: flex; gap: 10px; margin-bottom: 12px; }
+  .summary { display: flex; gap: 14px; margin-bottom: 16px; }
   .summary .card {
-    flex: 1; background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 9px 12px;
+    flex: 1; border-radius: var(--radius); padding: 11px 14px; box-shadow: var(--raise);
   }
   .summary .label { font-size: 11px; color: var(--muted); }
   .summary .value {
     font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px;
   }
 
-  .toolbar { display: flex; justify-content: flex-end; gap: 6px; margin: 2px 0 12px; }
-  .toolbar button { background: transparent; color: var(--muted); padding: 4px 8px; font-size: 12px; }
+  .toolbar { display: flex; justify-content: flex-end; gap: 10px; margin: 2px 2px 14px; }
+  .toolbar button {
+    background: var(--bg); color: var(--muted); padding: 6px 12px; font-size: 12px;
+    border-radius: 11px; box-shadow: var(--raise-sm);
+  }
+  .toolbar button:active { box-shadow: var(--inset-sm); }
 
   ul.timeline { list-style: none; margin: 0; padding: 0; }
   li.task {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 10px 12px; margin-bottom: 9px;
-    display: grid; grid-template-columns: 18px 1fr auto; gap: 0 10px; align-items: center;
-    transition: border-color .15s, opacity .15s, box-shadow .15s;
+    border-radius: var(--radius); padding: 13px 15px; margin-bottom: 13px;
+    box-shadow: var(--raise);
+    display: grid; grid-template-columns: 1fr auto; gap: 0 12px; align-items: center;
+    transition: box-shadow .2s, opacity .2s;
+    will-change: transform;
   }
-  li.task.running { border-color: var(--accent); background: var(--accent-soft); }
+  li.task.running { box-shadow: var(--raise), inset 0 0 0 1.5px rgba(79,157,255,.5); }
   li.task.done { opacity: .5; }
-  li.task.dragging { opacity: .9; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
 
-  .handle {
-    grid-column: 1; color: var(--muted); font-size: 15px; line-height: 1;
-    cursor: grab; user-select: none; touch-action: none; text-align: center;
-    align-self: center; height: 100%; display: flex; align-items: center; justify-content: center;
-  }
-  .handle:active { cursor: grabbing; }
-  .handle:focus-visible { outline: 2px solid var(--accent); border-radius: 6px; }
-  .handle.empty { cursor: default; }
-
-  .task-main { grid-column: 2; min-width: 0; }
+  .task-main { min-width: 0; }
+  .headline { display: flex; align-items: baseline; gap: 10px; }
   .task-name {
-    font-size: 15px; font-weight: 500; word-break: break-word;
-    cursor: text; border-bottom: 1px dashed transparent;
+    font-size: 15px; font-weight: 500; word-break: break-word; min-width: 0;
+    cursor: text;
   }
-  .task-name:hover { border-bottom-color: var(--line); }
   li.task.done .task-name { text-decoration: line-through; }
+  .task-dur {
+    font-size: 15px; color: var(--faded); margin-left: auto; white-space: nowrap;
+    cursor: text;
+  }
+  .task-dur.unset { color: var(--accent); }
+
   .task-meta {
-    margin-top: 2px; font-size: 12px; color: var(--muted);
+    margin-top: 3px; font-size: 12px; color: var(--muted);
     font-variant-numeric: tabular-nums;
     display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center;
   }
-  .task-meta .dur { color: var(--text); cursor: text; border-bottom: 1px dashed transparent; }
-  .task-meta .dur:hover { border-bottom-color: var(--line); }
-  .task-meta .dur.unset { color: var(--accent); }
   .task-meta .sched .arr { opacity: .45; margin: 0 1px; }
   .countdown { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
   .countdown.over { color: var(--warn); }
 
-  .task-actions { grid-column: 3; display: flex; gap: 4px; align-items: center; }
+  .task-actions { display: flex; gap: 7px; align-items: center; }
 
   .inline-edit {
-    background: var(--panel-2); border: 1px solid var(--accent); border-radius: 6px;
-    color: var(--text); font: inherit; padding: 2px 6px; max-width: 100%;
+    background: var(--bg); border: none; box-shadow: var(--inset-sm); border-radius: 8px;
+    color: var(--text); font: inherit; padding: 2px 8px; max-width: 100%; outline: none;
   }
-  .inline-edit.num { width: 64px; text-align: center; -moz-appearance: textfield; }
+  .inline-edit.num { width: 70px; text-align: center; -moz-appearance: textfield; }
   .inline-edit.num::-webkit-outer-spin-button,
   .inline-edit.num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
   button {
-    font-family: inherit; cursor: pointer; border: none; border-radius: 10px;
-    font-size: 14px; padding: 8px 12px; color: var(--text); background: var(--panel-2);
-    transition: filter .12s, background .12s;
+    font-family: inherit; cursor: pointer; border: none; color: var(--text);
+    background: var(--bg); transition: box-shadow .14s, color .14s, transform .05s;
   }
-  button:active { filter: brightness(1.25); }
-  button.primary { background: var(--accent); color: #06101f; font-weight: 600; }
-  button.done-btn { background: var(--done); color: #052016; font-weight: 600; }
   button.icon {
-    background: transparent; color: var(--muted); padding: 5px 7px;
-    font-size: 16px; line-height: 1;
+    width: 38px; height: 38px; border-radius: 12px; font-size: 15px; line-height: 1;
+    color: var(--muted); box-shadow: var(--raise-sm);
+    display: inline-flex; align-items: center; justify-content: center; padding: 0;
   }
   button.icon:hover { color: var(--text); }
-  button.icon.go { background: var(--accent); color: #06101f; }
-  button.icon.ok { background: var(--done); color: #052016; }
+  button.icon:active { box-shadow: var(--inset-sm); transform: translateY(1px); }
+  button.icon.go { color: var(--accent); }
+  button.icon.ok { color: var(--done); }
+  button.icon:disabled { opacity: .35; box-shadow: var(--raise-sm); cursor: default; }
 
-  .empty { text-align: center; color: var(--muted); padding: 36px 12px; font-size: 14px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 12px; font-size: 14px; }
 
   .addbar {
     position: fixed; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to top, var(--bg) 72%, transparent);
-    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 74%, transparent);
+    padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
   }
   .addbar-inner {
-    max-width: 560px; margin: 0 auto; display: flex; gap: 8px;
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 8px;
+    max-width: 560px; margin: 0 auto; display: flex; gap: 10px; align-items: center;
+    border-radius: var(--radius); padding: 8px 8px 8px 6px; box-shadow: var(--inset);
   }
   .addbar input {
     flex: 1; min-width: 0; background: transparent; border: none; outline: none;
-    color: var(--text); font-size: 16px; padding: 4px 8px;
+    color: var(--text); font-size: 16px; padding: 6px 10px;
   }
   .add-btn {
-    width: 44px; padding: 0; font-size: 22px; font-weight: 400; line-height: 1;
-    display: flex; align-items: center; justify-content: center; flex: none;
+    width: 46px; height: 42px; border-radius: 13px; flex: none;
+    font-size: 24px; font-weight: 300; line-height: 1; color: var(--accent);
+    box-shadow: var(--raise-sm); display: flex; align-items: center; justify-content: center;
   }
+  .add-btn:active { box-shadow: var(--inset-sm); transform: translateY(1px); }
 </style>
 </head>
 <body>
@@ -163,17 +164,13 @@
   </div>
 
   <ul class="timeline" id="timeline"></ul>
-  <div class="empty" id="empty">
-    下の欄に「やること 時間」を入れて＋。<br>
-    改行で複数行を貼り付ければまとめて取り込めます。<br>
-    例: 買い物 30 / ゲーム 1h / 昼寝 20m / 歯みがき 5
-  </div>
+  <div class="empty" id="empty">下の欄から「やること」を追加しましょう。</div>
 </div>
 
 <div class="addbar">
   <form class="addbar-inner" id="addForm">
-    <input type="text" id="nameInput" placeholder="やること 30  （改行で複数貼り付けOK）" autocomplete="off" />
-    <button type="submit" class="primary add-btn" title="追加">＋</button>
+    <input type="text" id="nameInput" placeholder="やること（改行で複数貼り付けOK）" autocomplete="off" />
+    <button type="submit" class="add-btn" title="追加">＋</button>
   </form>
 </div>
 
@@ -185,8 +182,6 @@
 
   /** @type {Array<{id:string,name:string,dur:number|null,status:string,startAt:number|null,endAt:number|null}>} */
   var tasks = load();
-  var dragEl = null;
-  var focusHandleId = null;
 
   // ---- persistence ----
   function load() {
@@ -202,11 +197,9 @@
   function find(id) { return tasks.find(function (t) { return t.id === id; }); }
 
   // ---- parsing (bulk / inline) ----
-  // "1h30m", "1h", "90m", "30", "1.5h", "20分", "1時間30分" -> minutes (or null)
   function parseDuration(token) {
     if (!token) return null;
-    var t = String(token).trim().toLowerCase().replace(/\s+/g, "");
-    var m;
+    var t = String(token).trim().toLowerCase().replace(/\s+/g, ""), m;
     m = t.match(/^(\d+(?:\.\d+)?)(?:h|時間)(?:(\d+)(?:m|分)?)?$/);
     if (m) return Math.round(parseFloat(m[1]) * 60 + (m[2] ? parseInt(m[2], 10) : 0));
     m = t.match(/^(\d+)(?:m|分)$/);
@@ -215,7 +208,6 @@
     if (m) return Math.round(parseFloat(m[1]));
     return null;
   }
-  // One line -> {name, dur|null}. Trailing token is read as duration when possible.
   function parseLine(line) {
     var s = String(line).replace(/　/g, " ").trim();
     if (!s) return null;
@@ -224,7 +216,7 @@
       var dur = parseDuration(parts[parts.length - 1]);
       if (dur != null) return { name: parts.slice(0, -1).join(" "), dur: dur };
     }
-    return { name: s, dur: null }; // 時間が読めない -> 名前だけ取り込み（分は後で手動）
+    return { name: s, dur: null };
   }
   function addFromText(text) {
     var added = 0;
@@ -302,14 +294,39 @@
   function move(id, dir) {
     var i = tasks.findIndex(function (t) { return t.id === id; }), j = i + dir;
     if (i < 0 || j < 0 || j >= tasks.length) return;
+    var first = captureTops();
     var tmp = tasks[i]; tasks[i] = tasks[j]; tasks[j] = tmp;
     save(); render();
+    flip(first);
   }
   function firstActionableId() {
     for (var i = 0; i < tasks.length; i++) if (tasks[i].status !== "done") return tasks[i].id;
     return null;
   }
   function anyRunning() { return tasks.some(function (t) { return t.status === "running"; }); }
+
+  // ---- FLIP reorder animation ----
+  function captureTops() {
+    var map = {};
+    timelineEl.querySelectorAll("li.task").forEach(function (li) {
+      map[li.getAttribute("data-id")] = li.getBoundingClientRect().top;
+    });
+    return map;
+  }
+  function flip(first) {
+    timelineEl.querySelectorAll("li.task").forEach(function (li) {
+      var prev = first[li.getAttribute("data-id")];
+      if (prev == null) return;
+      var dy = prev - li.getBoundingClientRect().top;
+      if (!dy) return;
+      li.style.transition = "none";
+      li.style.transform = "translateY(" + dy + "px)";
+      requestAnimationFrame(function () {
+        li.style.transition = "transform .17s cubic-bezier(.2,.8,.2,1)";
+        li.style.transform = "";
+      });
+    });
+  }
 
   // ---- inline editing ----
   function editInline(span, current, numeric, commit) {
@@ -333,38 +350,6 @@
     });
   }
 
-  // ---- drag & drop (mouse + touch via pointer events) ----
-  function startDrag(e, handleEl, li) {
-    if (e.button != null && e.button > 0) return;
-    e.preventDefault();
-    dragEl = li;
-    li.classList.add("dragging");
-    try { handleEl.setPointerCapture(e.pointerId); } catch (_) {}
-
-    function onMove(ev) {
-      var y = ev.clientY, items = [].slice.call(timelineEl.querySelectorAll("li.task")), ref = null;
-      for (var i = 0; i < items.length; i++) {
-        if (items[i] === dragEl) continue;
-        var r = items[i].getBoundingClientRect();
-        if (y < r.top + r.height / 2) { ref = items[i]; break; }
-      }
-      if (ref) timelineEl.insertBefore(dragEl, ref); else timelineEl.appendChild(dragEl);
-    }
-    function onUp() {
-      handleEl.removeEventListener("pointermove", onMove);
-      handleEl.removeEventListener("pointerup", onUp);
-      handleEl.removeEventListener("pointercancel", onUp);
-      li.classList.remove("dragging");
-      var ids = [].slice.call(timelineEl.querySelectorAll("li.task"))
-        .map(function (x) { return x.getAttribute("data-id"); });
-      tasks.sort(function (a, b) { return ids.indexOf(a.id) - ids.indexOf(b.id); });
-      dragEl = null; save(); render();
-    }
-    handleEl.addEventListener("pointermove", onMove);
-    handleEl.addEventListener("pointerup", onUp);
-    handleEl.addEventListener("pointercancel", onUp);
-  }
-
   // ---- rendering ----
   var timelineEl = document.getElementById("timeline");
   var emptyEl = document.getElementById("empty");
@@ -375,16 +360,18 @@
     if (text != null) n.textContent = text;
     return n;
   }
-  function iconBtn(label, cls, title, fn) {
+  function iconBtn(label, cls, title, fn, disabled) {
     var b = el("button", "icon " + (cls || ""), label);
     if (title) b.title = title;
-    b.addEventListener("click", fn);
+    if (disabled) b.disabled = true;
+    else b.addEventListener("click", fn);
     return b;
   }
 
   function render() {
     var result = computeSchedule(), sched = result.sched;
     var nextId = firstActionableId(), running = anyRunning();
+    var pendingIds = tasks.filter(function (t) { return t.status === "pending"; }).map(function (t) { return t.id; });
 
     emptyEl.style.display = tasks.length ? "none" : "block";
     timelineEl.innerHTML = "";
@@ -394,32 +381,15 @@
       var li = el("li", "task" + (t.status === "running" ? " running" : "") + (t.status === "done" ? " done" : ""));
       li.setAttribute("data-id", t.id);
 
-      // drag handle (pending only)
-      var handle = el("div", "handle", t.status === "pending" ? "⋮⋮" : "");
-      if (t.status === "pending") {
-        handle.tabIndex = 0;
-        handle.setAttribute("role", "button");
-        handle.setAttribute("aria-label", "ドラッグ、または Ctrl+↑↓ で並び替え");
-        handle.addEventListener("pointerdown", function (e) { startDrag(e, handle, li); });
-        handle.addEventListener("keydown", function (e) {
-          if (e.ctrlKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
-            e.preventDefault(); focusHandleId = t.id; move(t.id, e.key === "ArrowUp" ? -1 : 1);
-          }
-        });
-      } else { handle.classList.add("empty"); }
-      li.appendChild(handle);
-
-      // main
+      // main: headline (name + duration) then meta (times)
       var main = el("div", "task-main");
-      var nm = el("div", "task-name", t.name);
+      var head = el("div", "headline");
+      var nm = el("span", "task-name", t.name);
       nm.title = "タップで名前を編集";
       nm.addEventListener("click", function () {
         editInline(nm, t.name, false, function (v) { v = v.trim(); if (v) t.name = v; });
       });
-      main.appendChild(nm);
-
-      var meta = el("div", "task-meta");
-      var dur = el("span", "dur" + (t.dur == null ? " unset" : ""), t.dur == null ? "分を設定" : fmtMin(t.dur));
+      var dur = el("span", "task-dur" + (t.dur == null ? " unset" : ""), t.dur == null ? "分を設定" : fmtMin(t.dur));
       dur.title = "タップで時間を編集";
       dur.addEventListener("click", function () {
         editInline(dur, t.dur == null ? "" : t.dur, true, function (v) {
@@ -428,8 +398,10 @@
           else { var n = parseInt(v, 10); t.dur = (isNaN(n) || n < 0) ? null : n; }
         });
       });
-      meta.appendChild(dur);
+      head.appendChild(nm); head.appendChild(dur);
+      main.appendChild(head);
 
+      var meta = el("div", "task-meta");
       if (s && s.start != null && s.end != null && (t.status !== "pending" || t.dur != null)) {
         var sc = el("span", "sched");
         sc.innerHTML = fmtClock(s.start) + "<span class='arr'>→</span>" + fmtClock(s.end);
@@ -440,7 +412,7 @@
         cd.setAttribute("data-cd", t.id);
         meta.appendChild(cd);
       }
-      main.appendChild(meta);
+      if (meta.childNodes.length) main.appendChild(meta);
       li.appendChild(main);
 
       // actions
@@ -454,6 +426,9 @@
         if (t.id === nextId && !running) {
           act.appendChild(iconBtn("▶", "go", "実行", function () { startTask(t.id); }));
         }
+        var pi = pendingIds.indexOf(t.id);
+        act.appendChild(iconBtn("▲", "", "上へ", function () { move(t.id, -1); }, pi <= 0));
+        act.appendChild(iconBtn("▼", "", "下へ", function () { move(t.id, 1); }, pi === pendingIds.length - 1));
         act.appendChild(iconBtn("✕", "", "削除", function () { deleteTask(t.id); }));
       }
       li.appendChild(act);
@@ -463,12 +438,6 @@
     document.getElementById("sumRemaining").textContent = fmtMin(remainingMinutes());
     var active = tasks.some(function (t) { return t.status !== "done"; });
     document.getElementById("sumFinish").textContent = active ? fmtClock(result.finish) : "--:--";
-
-    if (focusHandleId) {
-      var h = timelineEl.querySelector('li[data-id="' + focusHandleId + '"] .handle');
-      if (h) h.focus();
-      focusHandleId = null;
-    }
     tick();
   }
 
@@ -495,17 +464,15 @@
 
   // ---- input wiring ----
   var nameInput = document.getElementById("nameInput");
-
   document.getElementById("addForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    if (addFromText(nameInput.value) > 0) { nameInput.value = ""; nameInput.focus(); }
-    else nameInput.focus();
+    if (addFromText(nameInput.value) > 0) nameInput.value = "";
+    nameInput.focus();
   });
   nameInput.addEventListener("paste", function (e) {
     var text = (e.clipboardData || window.clipboardData).getData("text");
     if (text && /[\r\n]/.test(text)) { e.preventDefault(); addFromText(text); nameInput.value = ""; }
   });
-
   document.getElementById("clearDone").addEventListener("click", function () {
     tasks = tasks.filter(function (t) { return t.status !== "done"; }); save(); render();
   });
