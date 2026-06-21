@@ -13,12 +13,11 @@
     --bg: #e6e7ee;
     --text: #4a4f5c;
     --muted: #9aa0ad;
-    --faded: rgba(74, 79, 92, 0.40);
+    --faded: rgba(74, 79, 92, 0.42);
     --accent: #5b8def;
     --done: #3fb27f;
     --warn: #e9606b;
     --radius: 16px;
-    /* light neumorphism shadows */
     --sh-dark: rgba(163, 177, 198, 0.55);
     --sh-light: #ffffff;
     --raise: 6px 6px 12px var(--sh-dark), -6px -6px 12px var(--sh-light);
@@ -44,13 +43,14 @@
     gap: 8px; margin-bottom: 16px; min-height: 26px;
   }
   .now-clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
-  .corner { display: flex; gap: 6px; }
+  .corner { display: flex; gap: 4px; }
   .corner-btn {
-    background: transparent; border: none; cursor: pointer; padding: 4px;
-    font-size: 15px; line-height: 1; color: var(--muted); opacity: .55;
-    filter: grayscale(.3); transition: opacity .15s;
+    background: transparent; border: none; cursor: pointer; padding: 6px;
+    color: var(--muted); opacity: .6; transition: opacity .15s, color .15s;
+    display: inline-flex; align-items: center; justify-content: center;
   }
-  .corner-btn:hover { opacity: 1; }
+  .corner-btn:hover { opacity: 1; color: var(--text); }
+  .corner-btn svg { width: 17px; height: 17px; }
 
   .summary { display: flex; gap: 14px; margin-bottom: 18px; }
   .summary .card {
@@ -63,34 +63,36 @@
 
   ul.timeline { list-style: none; margin: 0; padding: 0; }
   li.task {
-    border-radius: var(--radius); padding: 13px 15px; margin-bottom: 13px;
+    border-radius: var(--radius); padding: 13px 14px; margin-bottom: 13px;
     box-shadow: var(--raise);
-    display: grid; grid-template-columns: 1fr auto; gap: 0 10px; align-items: center;
+    display: grid; grid-template-columns: 44px 1fr auto; gap: 0 12px; align-items: center;
     transition: box-shadow .2s, opacity .25s;
   }
   li.task.running { box-shadow: var(--raise), inset 0 0 0 2px rgba(91, 141, 239, .55); }
   li.task.done { opacity: .5; }
-  /* focus mode: dim everything except the running task */
-  .timeline.focusing li.task:not(.running) { opacity: .38; }
+  .timeline.focusing li.task:not(.running) { opacity: .36; }
   .timeline.focusing li.task.running { opacity: 1; }
 
-  .task-main { min-width: 0; }
-  .headline { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  /* left timeline column: predicted clock time, vertically aligned */
+  .task-time {
+    grid-column: 1; font-size: 13px; color: var(--muted);
+    font-variant-numeric: tabular-nums; letter-spacing: .02em; align-self: center;
+  }
+  li.task.running .task-time { color: var(--accent); font-weight: 700; }
+
+  .task-main { grid-column: 2; min-width: 0; }
+  .headline { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
   .task-name { font-size: 15px; font-weight: 500; word-break: break-word; cursor: text; }
   li.task.done .task-name { text-decoration: line-through; }
   .task-dur { font-size: 15px; color: var(--faded); white-space: nowrap; cursor: text; }
   .task-dur.unset { color: var(--accent); }
-
-  .task-meta {
-    margin-top: 3px; font-size: 12px; color: var(--muted);
+  .countdown {
+    margin-top: 2px; font-size: 12px; color: var(--accent); font-weight: 700;
     font-variant-numeric: tabular-nums;
-    display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center;
   }
-  .task-meta .sched .arr { opacity: .45; margin: 0 1px; }
-  .countdown { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
   .countdown.over { color: var(--warn); }
 
-  .task-actions { display: flex; gap: 8px; align-items: center; }
+  .task-actions { grid-column: 3; display: flex; gap: 6px; align-items: center; }
 
   .inline-edit {
     background: var(--bg); border: none; box-shadow: var(--inset-sm); border-radius: 8px;
@@ -101,39 +103,39 @@
   .inline-edit.num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
   button { font-family: inherit; cursor: pointer; border: none; color: var(--text); background: var(--bg); }
+  button svg { display: block; }
 
-  /* compact, flat reorder chevrons */
-  .reorder { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  /* compact, flat reorder chevrons with a roomy hit area */
+  .reorder { display: flex; flex-direction: column; justify-content: center; gap: 1px; }
   .mini {
-    width: 22px; height: 15px; border-radius: 6px; font-size: 8px; padding: 0;
+    width: 30px; height: 21px; border-radius: 7px; padding: 0;
     background: transparent; color: var(--muted);
-    display: flex; align-items: center; justify-content: center;
-    transition: color .12s;
+    display: flex; align-items: center; justify-content: center; transition: color .12s;
   }
+  .mini svg { width: 13px; height: 13px; }
   .mini:hover { color: var(--text); }
-  .mini:disabled { opacity: .28; cursor: default; }
+  .mini:disabled { opacity: .26; cursor: default; }
 
   /* flat secondary icons (delete / reopen) */
   .icon-flat {
-    width: 30px; height: 30px; border-radius: 9px; font-size: 13px;
+    width: 32px; height: 32px; border-radius: 9px;
     background: transparent; color: var(--muted);
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: color .12s;
+    display: inline-flex; align-items: center; justify-content: center; transition: color .12s;
   }
+  .icon-flat svg { width: 16px; height: 16px; }
   .icon-flat:hover { color: var(--text); }
 
   /* strong primary icons (run / done) */
   .icon-strong {
-    width: 40px; height: 40px; border-radius: 13px; font-size: 15px;
+    width: 40px; height: 40px; border-radius: 13px;
     box-shadow: var(--raise-sm); color: var(--muted);
     display: inline-flex; align-items: center; justify-content: center;
     transition: box-shadow .14s, transform .05s, color .14s;
   }
+  .icon-strong svg { width: 17px; height: 17px; }
   .icon-strong:active { box-shadow: var(--inset-sm); transform: translateY(1px); }
   .icon-strong.go { color: var(--accent); }
   .icon-strong.ok { color: var(--done); }
-
-  .empty { text-align: center; color: var(--muted); padding: 40px 12px; font-size: 13px; opacity: .8; }
 
   .addbar {
     position: fixed; left: 0; right: 0; bottom: 0;
@@ -148,13 +150,12 @@
     flex: 1; min-width: 0; background: transparent; border: none; outline: none;
     color: var(--text); font-size: 16px; font-family: inherit; padding: 6px 10px;
   }
-  .addbar input::placeholder { color: var(--muted); }
   .add-btn {
-    width: 46px; height: 42px; border-radius: 13px; flex: none;
-    font-size: 24px; font-weight: 300; line-height: 1; color: var(--accent);
+    width: 46px; height: 42px; border-radius: 13px; flex: none; color: var(--accent);
     box-shadow: var(--raise-sm); display: flex; align-items: center; justify-content: center;
     transition: box-shadow .14s, transform .05s;
   }
+  .add-btn svg { width: 22px; height: 22px; }
   .add-btn:active { box-shadow: var(--inset-sm); transform: translateY(1px); }
 </style>
 </head>
@@ -163,15 +164,15 @@
   <header>
     <span class="now-clock" id="nowClock">--:--</span>
     <div class="corner">
-      <button id="clearDone" class="corner-btn" title="完了したものを消す">🧹</button>
-      <button id="resetAll" class="corner-btn" title="すべて消す">🗑</button>
+      <button id="clearDone" class="corner-btn" title="完了したものを消す"></button>
+      <button id="resetAll" class="corner-btn" title="すべて消す"></button>
     </div>
   </header>
 
   <div class="summary">
     <div class="card">
       <div class="label">残り</div>
-      <div class="value" id="sumRemaining">0分</div>
+      <div class="value" id="sumRemaining">0m</div>
     </div>
     <div class="card">
       <div class="label">終了予定</div>
@@ -180,13 +181,12 @@
   </div>
 
   <ul class="timeline" id="timeline"></ul>
-  <div class="empty" id="empty">下の欄から追加できます。</div>
 </div>
 
 <div class="addbar">
   <form class="addbar-inner" id="addForm">
-    <input type="text" id="nameInput" placeholder="やること（改行で複数貼り付けOK）" autocomplete="off" />
-    <button type="submit" class="add-btn" title="追加">＋</button>
+    <input type="text" id="nameInput" autocomplete="off" />
+    <button type="submit" class="add-btn" title="追加" id="addBtn"></button>
   </form>
 </div>
 
@@ -195,6 +195,20 @@
   "use strict";
 
   var STORAGE_KEY = "imayaru.tasks.v1";
+
+  // ---- monochrome inline SVG icons (no emoji) ----
+  var S = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">';
+  var ICON = {
+    play:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.3l11 6.7-11 6.7z"/></svg>',
+    check: S + '<path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+    x:     S + '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
+    undo:  S + '<path d="M9 5L4 9.5l5 4.5"/><path d="M4 9.5h9a6 6 0 0 1 0 12H8"/></svg>',
+    up:    S + '<path d="M5 14l7-7 7 7"/></svg>',
+    down:  S + '<path d="M5 10l7 7 7-7"/></svg>',
+    plus:  S + '<path d="M12 5v14M5 12h14"/></svg>',
+    trash: S + '<path d="M4 7h16"/><path d="M9.5 7V5h5v2"/><path d="M6.6 7l.9 12.1a1 1 0 0 0 1 .9h7a1 1 0 0 0 1-.9L17.4 7"/><path d="M10 10.5v6M14 10.5v6"/></svg>',
+    sweep: S + '<path d="M3 13l3.6 3.6L13 9"/><path d="M11 15.5l1.3 1.3L21 8"/></svg>'
+  };
 
   /** @type {Array<{id:string,name:string,dur:number|null,status:string,startAt:number|null,endAt:number|null}>} */
   var tasks = load();
@@ -207,9 +221,7 @@
       return Array.isArray(data) ? data : [];
     } catch (e) { return []; }
   }
-  function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch (e) {}
-  }
+  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch (e) {} }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function find(id) { return tasks.find(function (t) { return t.id === id; }); }
 
@@ -254,9 +266,7 @@
   }
   function addFromText(text) {
     var items = [];
-    String(text).split(/\r?\n/).forEach(function (line) {
-      var p = parseLine(line); if (p) items.push(p);
-    });
+    String(text).split(/\r?\n/).forEach(function (line) { var p = parseLine(line); if (p) items.push(p); });
     if (!items.length) return 0;
     pushHistory();
     items.forEach(function (p) {
@@ -268,12 +278,12 @@
 
   // ---- time helpers ----
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
-  function fmtClock(ms) { var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function fmtMin(min) {
+  function fmtClock(ms) { if (ms == null) return "--:--"; var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function fmtDur(min) {
     if (min == null) return "—";
-    if (min < 60) return min + "分";
+    if (min < 60) return min + "m";
     var h = Math.floor(min / 60), m = min % 60;
-    return m === 0 ? h + "時間" : h + "時間" + m + "分";
+    return m === 0 ? h + "h" : h + "h" + m + "m";
   }
   function fmtCountdown(ms) {
     var over = ms < 0, s = Math.round(Math.abs(ms) / 1000);
@@ -310,9 +320,7 @@
   // ---- actions ----
   function startTask(id) {
     pushHistory();
-    tasks.forEach(function (t) {
-      if (t.status === "running" && t.id !== id) { t.status = "done"; t.endAt = Date.now(); }
-    });
+    tasks.forEach(function (t) { if (t.status === "running" && t.id !== id) { t.status = "done"; t.endAt = Date.now(); } });
     var t = find(id);
     if (t) { t.status = "running"; t.startAt = Date.now(); t.endAt = null; }
     save(); render();
@@ -395,7 +403,6 @@
 
   // ---- rendering ----
   var timelineEl = document.getElementById("timeline");
-  var emptyEl = document.getElementById("empty");
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -403,8 +410,9 @@
     if (text != null) n.textContent = text;
     return n;
   }
-  function btn(label, cls, title, fn, disabled) {
-    var b = el("button", cls, label);
+  function btn(icon, cls, title, fn, disabled) {
+    var b = el("button", cls);
+    b.innerHTML = icon;
     if (title) b.title = title;
     if (disabled) b.disabled = true;
     else if (fn) b.addEventListener("click", fn);
@@ -416,7 +424,6 @@
     var nextId = firstActionableId(), running = anyRunning();
     var pendingIds = tasks.filter(function (t) { return t.status === "pending"; }).map(function (t) { return t.id; });
 
-    emptyEl.style.display = tasks.length ? "none" : "block";
     timelineEl.classList.toggle("focusing", running);
     timelineEl.innerHTML = "";
 
@@ -425,7 +432,10 @@
       var li = el("li", "task" + (t.status === "running" ? " running" : "") + (t.status === "done" ? " done" : ""));
       li.setAttribute("data-id", t.id);
 
-      // main: headline (name + duration) then meta (times)
+      // col 1: predicted start time (aligned timeline column)
+      li.appendChild(el("div", "task-time", fmtClock(s ? s.start : null)));
+
+      // col 2: name + duration (+ countdown when running)
       var main = el("div", "task-main");
       var head = el("div", "headline");
       var nm = el("span", "task-name", t.name);
@@ -433,7 +443,7 @@
       nm.addEventListener("click", function () {
         editInline(nm, t.name, false, function (v) { v = v.trim(); if (v) t.name = v; });
       });
-      var dur = el("span", "task-dur" + (t.dur == null ? " unset" : ""), t.dur == null ? "分を設定" : fmtMin(t.dur));
+      var dur = el("span", "task-dur" + (t.dur == null ? " unset" : ""), fmtDur(t.dur));
       dur.title = "タップで時間を編集";
       dur.addEventListener("click", function () {
         editInline(dur, t.dur == null ? "" : t.dur, true, function (v) {
@@ -444,44 +454,36 @@
       });
       head.appendChild(nm); head.appendChild(dur);
       main.appendChild(head);
-
-      var meta = el("div", "task-meta");
-      if (s && s.start != null && s.end != null && (t.status !== "pending" || t.dur != null)) {
-        var sc = el("span", "sched");
-        sc.innerHTML = fmtClock(s.start) + "<span class='arr'>→</span>" + fmtClock(s.end);
-        meta.appendChild(sc);
-      }
       if (t.status === "running") {
-        var cd = el("span", "countdown");
+        var cd = el("div", "countdown");
         cd.setAttribute("data-cd", t.id);
-        meta.appendChild(cd);
+        main.appendChild(cd);
       }
-      if (meta.childNodes.length) main.appendChild(meta);
       li.appendChild(main);
 
-      // actions
+      // col 3: actions
       var act = el("div", "task-actions");
       if (t.status === "running") {
-        act.appendChild(btn("✓", "icon-strong ok", "完了", function () { finishTask(t.id); }));
+        act.appendChild(btn(ICON.check, "icon-strong ok", "完了", function () { finishTask(t.id); }));
       } else if (t.status === "done") {
-        act.appendChild(btn("↺", "icon-flat", "やり直す", function () { reopenTask(t.id); }));
-        act.appendChild(btn("✕", "icon-flat", "削除", function () { deleteTask(t.id); }));
+        act.appendChild(btn(ICON.undo, "icon-flat", "やり直す", function () { reopenTask(t.id); }));
+        act.appendChild(btn(ICON.x, "icon-flat", "削除", function () { deleteTask(t.id); }));
       } else {
         if (t.id === nextId && !running) {
-          act.appendChild(btn("▶", "icon-strong go", "実行", function () { startTask(t.id); }));
+          act.appendChild(btn(ICON.play, "icon-strong go", "実行", function () { startTask(t.id); }));
         }
         var pi = pendingIds.indexOf(t.id);
         var reorder = el("div", "reorder");
-        reorder.appendChild(btn("▲", "mini", "上へ", function () { move(t.id, -1); }, pi <= 0));
-        reorder.appendChild(btn("▼", "mini", "下へ", function () { move(t.id, 1); }, pi === pendingIds.length - 1));
+        reorder.appendChild(btn(ICON.up, "mini", "上へ", function () { move(t.id, -1); }, pi <= 0));
+        reorder.appendChild(btn(ICON.down, "mini", "下へ", function () { move(t.id, 1); }, pi === pendingIds.length - 1));
         act.appendChild(reorder);
-        act.appendChild(btn("✕", "icon-flat", "削除", function () { deleteTask(t.id); }));
+        act.appendChild(btn(ICON.x, "icon-flat", "削除", function () { deleteTask(t.id); }));
       }
       li.appendChild(act);
       timelineEl.appendChild(li);
     });
 
-    document.getElementById("sumRemaining").textContent = fmtMin(remainingMinutes());
+    document.getElementById("sumRemaining").textContent = fmtDur(remainingMinutes());
     var active = tasks.some(function (t) { return t.status !== "done"; });
     document.getElementById("sumFinish").textContent = active ? fmtClock(result.finish) : "--:--";
     tick();
@@ -503,12 +505,16 @@
     tick();
     if (anyRunning()) {
       var r = computeSchedule();
-      document.getElementById("sumRemaining").textContent = fmtMin(remainingMinutes());
+      document.getElementById("sumRemaining").textContent = fmtDur(remainingMinutes());
       document.getElementById("sumFinish").textContent = fmtClock(r.finish);
     }
   }, 1000);
 
   // ---- input wiring ----
+  document.getElementById("addBtn").innerHTML = ICON.plus;
+  document.getElementById("clearDone").innerHTML = ICON.sweep;
+  document.getElementById("resetAll").innerHTML = ICON.trash;
+
   var nameInput = document.getElementById("nameInput");
   document.getElementById("addForm").addEventListener("submit", function (e) {
     e.preventDefault();
