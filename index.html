@@ -63,10 +63,10 @@
 
   ul.timeline { list-style: none; margin: 0; padding: 0; }
   li.task {
-    position: relative;
+    position: relative; overflow: hidden;
     border-radius: var(--radius); padding: 12px 14px; margin-bottom: 13px;
     box-shadow: var(--raise);
-    display: grid; grid-template-columns: 36px minmax(0, 1fr) 52px 104px;
+    display: grid; grid-template-columns: 36px minmax(0, 1fr) 72px 96px;
     column-gap: 8px; align-items: center;
     transition: box-shadow .2s, opacity .25s;
   }
@@ -93,24 +93,29 @@
   }
   .task-dur { font-size: 15px; color: var(--faded); white-space: nowrap; cursor: text; }
   .task-dur.unset { color: var(--accent); }
+  .measured-row { display: flex; align-items: baseline; gap: 5px; }
   .task-measured {
     font-size: 12px; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .task-measured.over { color: var(--warn); }
+  .task-delta {
+    font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .task-delta.over { color: var(--warn); }
 
   /* col 4: actions */
   .task-actions { grid-column: 4; display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
 
   /* running progress bar (bottom edge) */
   .progress-track {
-    position: absolute; left: 14px; right: 14px; bottom: 6px; height: 3px;
-    border-radius: 3px; background: rgba(163, 177, 198, .35); overflow: hidden;
+    position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+    background: rgba(163, 177, 198, .30);
   }
   .progress-fill {
-    height: 100%; width: 0; border-radius: 3px;
-    background: rgba(91, 141, 239, .55); transition: width 1s linear;
+    height: 100%; width: 0;
+    background: rgba(91, 141, 239, .6); transition: width 1s linear;
   }
-  .progress-fill.over { background: rgba(233, 96, 107, .6); }
+  .progress-fill.over { background: rgba(233, 96, 107, .65); }
 
   .inline-edit {
     background: var(--bg); border: none; box-shadow: var(--inset-sm); border-radius: 8px;
@@ -125,24 +130,24 @@
 
   .reorder { display: flex; flex-direction: column; justify-content: center; gap: 1px; }
   .mini {
-    width: 28px; height: 22px; border-radius: 7px; padding: 0;
+    width: 26px; height: 20px; border-radius: 7px; padding: 0;
     background: transparent; color: var(--muted);
     display: flex; align-items: center; justify-content: center; transition: color .12s;
   }
-  .mini svg { width: 13px; height: 13px; }
+  .mini svg { width: 12px; height: 12px; }
   .mini:hover { color: var(--text); }
   .mini:disabled { opacity: .26; cursor: default; }
 
   .icon-flat {
-    width: 30px; height: 30px; border-radius: 9px;
+    width: 28px; height: 28px; border-radius: 9px;
     background: transparent; color: var(--muted);
     display: inline-flex; align-items: center; justify-content: center; transition: color .12s;
   }
-  .icon-flat svg { width: 16px; height: 16px; }
+  .icon-flat svg { width: 15px; height: 15px; }
   .icon-flat:hover { color: var(--text); }
 
   .icon-strong {
-    width: 36px; height: 36px; border-radius: 12px;
+    width: 34px; height: 34px; border-radius: 11px;
     box-shadow: var(--raise-sm); color: var(--muted);
     display: inline-flex; align-items: center; justify-content: center;
     transition: box-shadow .14s, transform .05s, color .14s;
@@ -473,9 +478,16 @@
       });
       durCol.appendChild(dur);
       if (t.status === "running") {
+        var mrow = el("div", "measured-row");
         var meas = el("span", "task-measured");
         meas.setAttribute("data-cd", t.id);
-        durCol.appendChild(meas);
+        mrow.appendChild(meas);
+        if (t.dur != null) {
+          var delta = el("span", "task-delta");
+          delta.setAttribute("data-delta", t.id);
+          mrow.appendChild(delta);
+        }
+        durCol.appendChild(mrow);
       }
       li.appendChild(durCol);
 
@@ -525,6 +537,13 @@
       var elapsed = now - t.startAt;
       node.textContent = fmtElapsed(elapsed);
       node.classList.toggle("over", t.dur != null && elapsed > durMs(t));
+    });
+    timelineEl.querySelectorAll("[data-delta]").forEach(function (node) {
+      var t = find(node.getAttribute("data-delta"));
+      if (!t || t.status !== "running" || t.dur == null) return;
+      var diff = Math.round((now - t.startAt - durMs(t)) / 60000);
+      node.textContent = (diff > 0 ? "+" : diff < 0 ? "−" : "") + Math.abs(diff) + "m";
+      node.classList.toggle("over", diff > 0);
     });
     timelineEl.querySelectorAll("[data-prog]").forEach(function (node) {
       var t = find(node.getAttribute("data-prog"));
