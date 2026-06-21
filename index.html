@@ -63,52 +63,69 @@
 
   ul.timeline { list-style: none; margin: 0; padding: 0; }
   li.task {
-    border-radius: var(--radius); padding: 13px 14px; margin-bottom: 13px;
+    position: relative;
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 13px;
     box-shadow: var(--raise);
-    display: grid; grid-template-columns: 44px 1fr auto; gap: 0 12px; align-items: center;
+    display: grid; grid-template-columns: 36px minmax(0, 1fr) 52px 104px;
+    column-gap: 8px; align-items: center;
     transition: box-shadow .2s, opacity .25s;
   }
-  li.task.running { box-shadow: var(--raise), inset 0 0 0 2px rgba(91, 141, 239, .55); }
+  li.task.running { box-shadow: var(--raise), inset 0 0 0 2px rgba(91, 141, 239, .35); }
   li.task.done { opacity: .5; }
   .timeline.focusing li.task:not(.running) { opacity: .36; }
   .timeline.focusing li.task.running { opacity: 1; }
 
-  /* left timeline column: predicted clock time, vertically aligned */
+  /* col 1: predicted clock time (subtle, aligned column) */
   .task-time {
     grid-column: 1; font-size: 13px; color: var(--muted);
     font-variant-numeric: tabular-nums; letter-spacing: .02em; align-self: center;
   }
-  li.task.running .task-time { color: var(--accent); font-weight: 700; }
 
+  /* col 2: name */
   .task-main { grid-column: 2; min-width: 0; }
-  .headline { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
   .task-name { font-size: 15px; font-weight: 500; word-break: break-word; cursor: text; }
   li.task.done .task-name { text-decoration: line-through; }
+
+  /* col 3: duration (planned) + measured time below, right-aligned & aligned */
+  .task-dur-col {
+    grid-column: 3; display: flex; flex-direction: column; align-items: flex-end;
+    justify-content: center; line-height: 1.25;
+  }
   .task-dur { font-size: 15px; color: var(--faded); white-space: nowrap; cursor: text; }
   .task-dur.unset { color: var(--accent); }
-  .countdown {
-    margin-top: 2px; font-size: 12px; color: var(--accent); font-weight: 700;
-    font-variant-numeric: tabular-nums;
+  .task-measured {
+    font-size: 12px; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .countdown.over { color: var(--warn); }
+  .task-measured.over { color: var(--warn); }
 
-  .task-actions { grid-column: 3; display: flex; gap: 6px; align-items: center; }
+  /* col 4: actions */
+  .task-actions { grid-column: 4; display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
+
+  /* running progress bar (bottom edge) */
+  .progress-track {
+    position: absolute; left: 14px; right: 14px; bottom: 6px; height: 3px;
+    border-radius: 3px; background: rgba(163, 177, 198, .35); overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0; border-radius: 3px;
+    background: rgba(91, 141, 239, .55); transition: width 1s linear;
+  }
+  .progress-fill.over { background: rgba(233, 96, 107, .6); }
 
   .inline-edit {
     background: var(--bg); border: none; box-shadow: var(--inset-sm); border-radius: 8px;
-    color: var(--text); font: inherit; padding: 2px 8px; max-width: 100%; outline: none;
+    color: var(--text); font: inherit; padding: 2px 6px; max-width: 100%; outline: none;
   }
-  .inline-edit.num { width: 72px; text-align: center; -moz-appearance: textfield; }
+  .inline-edit.num { width: 60px; text-align: right; -moz-appearance: textfield; }
   .inline-edit.num::-webkit-outer-spin-button,
   .inline-edit.num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
   button { font-family: inherit; cursor: pointer; border: none; color: var(--text); background: var(--bg); }
   button svg { display: block; }
 
-  /* compact, flat reorder chevrons with a roomy hit area */
   .reorder { display: flex; flex-direction: column; justify-content: center; gap: 1px; }
   .mini {
-    width: 30px; height: 21px; border-radius: 7px; padding: 0;
+    width: 28px; height: 22px; border-radius: 7px; padding: 0;
     background: transparent; color: var(--muted);
     display: flex; align-items: center; justify-content: center; transition: color .12s;
   }
@@ -116,23 +133,21 @@
   .mini:hover { color: var(--text); }
   .mini:disabled { opacity: .26; cursor: default; }
 
-  /* flat secondary icons (delete / reopen) */
   .icon-flat {
-    width: 32px; height: 32px; border-radius: 9px;
+    width: 30px; height: 30px; border-radius: 9px;
     background: transparent; color: var(--muted);
     display: inline-flex; align-items: center; justify-content: center; transition: color .12s;
   }
   .icon-flat svg { width: 16px; height: 16px; }
   .icon-flat:hover { color: var(--text); }
 
-  /* strong primary icons (run / done) */
   .icon-strong {
-    width: 40px; height: 40px; border-radius: 13px;
+    width: 36px; height: 36px; border-radius: 12px;
     box-shadow: var(--raise-sm); color: var(--muted);
     display: inline-flex; align-items: center; justify-content: center;
     transition: box-shadow .14s, transform .05s, color .14s;
   }
-  .icon-strong svg { width: 17px; height: 17px; }
+  .icon-strong svg { width: 16px; height: 16px; }
   .icon-strong:active { box-shadow: var(--inset-sm); transform: translateY(1px); }
   .icon-strong.go { color: var(--accent); }
   .icon-strong.ok { color: var(--done); }
@@ -285,9 +300,9 @@
     var h = Math.floor(min / 60), m = min % 60;
     return m === 0 ? h + "h" : h + "h" + m + "m";
   }
-  function fmtCountdown(ms) {
-    var over = ms < 0, s = Math.round(Math.abs(ms) / 1000);
-    return (over ? "+" : "") + Math.floor(s / 60) + ":" + pad(s % 60);
+  function fmtElapsed(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ":" + pad(s % 60);
   }
 
   // ---- scheduling ----
@@ -432,17 +447,21 @@
       var li = el("li", "task" + (t.status === "running" ? " running" : "") + (t.status === "done" ? " done" : ""));
       li.setAttribute("data-id", t.id);
 
-      // col 1: predicted start time (aligned timeline column)
+      // col 1: predicted start time
       li.appendChild(el("div", "task-time", fmtClock(s ? s.start : null)));
 
-      // col 2: name + duration (+ countdown when running)
+      // col 2: name
       var main = el("div", "task-main");
-      var head = el("div", "headline");
       var nm = el("span", "task-name", t.name);
       nm.title = "タップで名前を編集";
       nm.addEventListener("click", function () {
         editInline(nm, t.name, false, function (v) { v = v.trim(); if (v) t.name = v; });
       });
+      main.appendChild(nm);
+      li.appendChild(main);
+
+      // col 3: planned duration (+ measured time below when running)
+      var durCol = el("div", "task-dur-col");
       var dur = el("span", "task-dur" + (t.dur == null ? " unset" : ""), fmtDur(t.dur));
       dur.title = "タップで時間を編集";
       dur.addEventListener("click", function () {
@@ -452,16 +471,15 @@
           else { var n = parseInt(v, 10); t.dur = (isNaN(n) || n < 0) ? null : n; }
         });
       });
-      head.appendChild(nm); head.appendChild(dur);
-      main.appendChild(head);
+      durCol.appendChild(dur);
       if (t.status === "running") {
-        var cd = el("div", "countdown");
-        cd.setAttribute("data-cd", t.id);
-        main.appendChild(cd);
+        var meas = el("span", "task-measured");
+        meas.setAttribute("data-cd", t.id);
+        durCol.appendChild(meas);
       }
-      li.appendChild(main);
+      li.appendChild(durCol);
 
-      // col 3: actions
+      // col 4: actions
       var act = el("div", "task-actions");
       if (t.status === "running") {
         act.appendChild(btn(ICON.check, "icon-strong ok", "完了", function () { finishTask(t.id); }));
@@ -480,6 +498,15 @@
         act.appendChild(btn(ICON.x, "icon-flat", "削除", function () { deleteTask(t.id); }));
       }
       li.appendChild(act);
+
+      // running progress bar (bottom edge)
+      if (t.status === "running" && t.dur) {
+        var track = el("div", "progress-track");
+        var fill = el("div", "progress-fill");
+        fill.setAttribute("data-prog", t.id);
+        track.appendChild(fill); li.appendChild(track);
+      }
+
       timelineEl.appendChild(li);
     });
 
@@ -495,9 +522,17 @@
     timelineEl.querySelectorAll("[data-cd]").forEach(function (node) {
       var t = find(node.getAttribute("data-cd"));
       if (!t || t.status !== "running") return;
-      var remain = (t.startAt + durMs(t)) - now;
-      node.textContent = fmtCountdown(remain);
-      node.classList.toggle("over", remain < 0);
+      var elapsed = now - t.startAt;
+      node.textContent = fmtElapsed(elapsed);
+      node.classList.toggle("over", t.dur != null && elapsed > durMs(t));
+    });
+    timelineEl.querySelectorAll("[data-prog]").forEach(function (node) {
+      var t = find(node.getAttribute("data-prog"));
+      if (!t || t.status !== "running" || !t.dur) return;
+      var ratio = (now - t.startAt) / durMs(t);
+      var over = ratio > 1;
+      node.style.width = (Math.max(0, Math.min(1, ratio)) * 100) + "%";
+      node.classList.toggle("over", over);
     });
     document.getElementById("nowClock").textContent = fmtClock(now);
   }
